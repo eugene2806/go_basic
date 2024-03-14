@@ -16,7 +16,7 @@ func reverse(arr []int) []int {
 }
 
 func convertCsvFile(s []string) []int {
-	var numbers  []int
+	var numbers []int
 	for _, value := range s {
 		num, _ := strconv.Atoi(value)
 		numbers = append(numbers, num)
@@ -25,7 +25,7 @@ func convertCsvFile(s []string) []int {
 }
 
 func readCsvFile() []int {
-	file, err := os.Open("/Users/eugene/Desktop/go/go_basic/src/input.csv")
+	file, err := os.Open("input.csv")
 	if err != nil {
 		fmt.Println("Ошибка открытия файла:", err)
 		return nil
@@ -43,7 +43,7 @@ func readCsvFile() []int {
 }
 
 func writeCsvFile(nums []int) {
-	file, err := os.Create("/Users/eugene/Desktop/go/go_basic/src/output.csv")
+	file, err := os.Create("output.csv")
 	if err != nil {
 		fmt.Println("Ошибка открытия файла:", err)
 		return
