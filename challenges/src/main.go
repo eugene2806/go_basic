@@ -11,8 +11,8 @@ func addStudentCard(studentCard map[string]map[string]int,
 	gradeStr string) {
 
 	grade, _ := strconv.Atoi(gradeStr)
-	var trueQuestionAnswer string = "yes"
-	var falseQuestionAnswer string = "no"
+	const trueQuestionAnswer = "yes"
+	const falseQuestionAnswer = "no"
 	var answer string
 
 	lessonMap, ok := studentCard[name]
