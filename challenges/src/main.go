@@ -39,33 +39,42 @@ func addStudentCard(
 		return
 	}
 
-	addLesson(studentCard, student, name, lesson, grade, checkLesson)
+	addLesson(studentCard, student, lesson, grade, checkLesson)
 
+}
+
+func NewLessonInfo(newLesson string, newGrade int) *LessonInfo {
+	return &LessonInfo{Title: newLesson, Grade: newGrade}
+}
+
+func createLesson(
+	studentCard map[string]Student,
+	student Student,
+	lesson string,
+	grade int,
+) {
+	student.Lessons = append(student.Lessons, *NewLessonInfo(lesson, grade))
+	studentCard[student.Name] = student
 }
 
 func addLesson(
 	studentCard map[string]Student,
 	student Student,
-	name, lesson string,
+	lesson string,
 	grade int,
 	checkLesson bool,
 ) {
-	if !checkLesson {
-		student.Lessons = append(student.Lessons, LessonInfo{Title: lesson, Grade: grade})
-		studentCard[name] = student
-		return
-	}
+	if checkLesson {
+		for i, les := range student.Lessons {
+			if les.Title == lesson {
+				student.Lessons[i].Grade = grade
 
-	for i, les := range student.Lessons {
-		if les.Title == lesson {
-			student.Lessons[i].Grade = grade
-
-			return
+				return
+			}
 		}
 	}
 
-	student.Lessons = append(student.Lessons, LessonInfo{Title: lesson, Grade: grade})
-	studentCard[name] = student
+	createLesson(studentCard, student, lesson, grade)
 
 	return
 }
@@ -102,8 +111,39 @@ func studentList(studentCard map[string]Student) {
 	}
 }
 
-func main() {
+func checkLessonDuplicate() bool {
+	var answer string
+	fmt.Println("Исключать дубли предметов из карты студентов?")
 
+	for {
+		fmt.Printf("Введите ответ YES | NO : ")
+
+		_, err := fmt.Scan(&answer)
+		if err != nil {
+			fmt.Println("Ошибка ввода")
+
+			continue
+		}
+
+		answer = strings.ToLower(answer)
+
+		if answer == trueQuestionAnswer {
+
+			fmt.Println("Дубли предметов будут удалены")
+
+			return true
+		}
+
+		if answer == falseQuestionAnswer {
+
+			fmt.Println("Дубли предметов будут добавлены")
+
+			return false
+		}
+	}
+}
+
+func main() {
 	studentGrades := make(map[string]Student)
 	studentArray := [][]string{
 		{"John", "Математика", "8"},
@@ -114,38 +154,6 @@ func main() {
 		{"Gleb", "Изо", "3"},
 		{"Anna", "Английский", "7"},
 		{"Anna", "Английский", "8"},
-	}
-
-	checkLessonDuplicate := func() bool {
-		var answer string
-		fmt.Println("Исключать дубли предметов из карты студентов?")
-
-		for {
-			fmt.Printf("Введите ответ YES | NO : ")
-
-			_, err := fmt.Scan(&answer)
-			if err != nil {
-				fmt.Println("Ошибка ввода")
-
-				continue
-			}
-
-			answer = strings.ToLower(answer)
-
-			if answer == trueQuestionAnswer {
-
-				fmt.Println("Дубли предметов будут удалены")
-
-				return true
-			}
-
-			if answer == falseQuestionAnswer {
-
-				fmt.Println("Дубли предметов будут добавлены")
-
-				return false
-			}
-		}
 	}
 
 	checkLesson := checkLessonDuplicate()
