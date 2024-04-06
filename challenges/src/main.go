@@ -6,68 +6,85 @@ import (
 	"strings"
 )
 
-func addStudentCard(studentCard map[string]map[string]int,
-	name, lesson string,
-	gradeStr string) {
+const trueQuestionAnswer = "yes"
+const falseQuestionAnswer = "no"
 
+type Student struct {
+	Name    string
+	Lessons []LessonInfo
+}
+
+type LessonInfo struct {
+	Title string
+	Grade int
+}
+
+// Добавление студента
+func addStudentCard(
+	studentCard map[string]Student,
+	name, lesson, gradeStr string,
+	checkLesson bool,
+) {
 	grade, _ := strconv.Atoi(gradeStr)
-	const trueQuestionAnswer = "yes"
-	const falseQuestionAnswer = "no"
-	var answer string
-
-	lessonMap, ok := studentCard[name]
-	value, isOk := lessonMap[lesson]
+	student, ok := studentCard[name]
 
 	if !ok {
-		studentCard[name] = map[string]int{lesson: grade}
+		studentCard[name] = Student{
+			Name: name,
+			Lessons: []LessonInfo{
+				*NewLessonInfo(lesson, grade),
+			},
+		}
 
 		return
 	}
 
-	if !isOk {
-		lessonMap[lesson] = grade
+	addLesson(studentCard, student, lesson, grade, checkLesson)
 
-		return
-	}
+}
 
-	if isOk {
-		fmt.Printf("Вы хотите изменить данные по уже существующему предмету %s %s!\n ", name, lesson)
+func NewLessonInfo(newLesson string, newGrade int) *LessonInfo {
+	return &LessonInfo{Title: newLesson, Grade: newGrade}
+}
 
-		for {
-			fmt.Printf("Вы уверены что хотите внести изменения? YES | NO :")
+func createLesson(
+	studentCard map[string]Student,
+	student Student,
+	lesson string,
+	grade int,
+) {
+	student.Lessons = append(student.Lessons, *NewLessonInfo(lesson, grade))
+	studentCard[student.Name] = student
+}
 
-			_, err := fmt.Scan(&answer)
-			if err != nil {
-				fmt.Println("Ошибка ввода")
-
-				return
-			}
-
-			if strings.ToLower(answer) == trueQuestionAnswer {
-				lessonMap[lesson] = grade
-
-				fmt.Println("Изменения внесены")
-
-				return
-			}
-
-			if strings.ToLower(answer) == falseQuestionAnswer {
-				lessonMap[lesson] = value
-
-				fmt.Println("Изменения не внесены")
+func addLesson(
+	studentCard map[string]Student,
+	student Student,
+	lesson string,
+	grade int,
+	checkLesson bool,
+) {
+	if checkLesson {
+		for i, les := range student.Lessons {
+			if les.Title == lesson {
+				student.Lessons[i].Grade = grade
 
 				return
 			}
 		}
 	}
+
+	createLesson(studentCard, student, lesson, grade)
+
+	return
 }
 
-func averageGrade(studentCard map[string]map[string]int, name string) (float32, bool) {
+func averageGrade(studentCard map[string]Student, name string) (float32, bool) {
 	var sum int
 	var res float32
 	var counter int
 
-	lessonMap, ok := studentCard[name]
+	student, ok := studentCard[name]
 
 	if !ok {
 		fmt.Printf("Ошибка подсчета для: %s", name)
@@ -75,31 +92,59 @@ func averageGrade(studentCard map[string]map[string]int, name string) (float32, 
 		return 0, false
 	}
 
-	if ok {
-		for _, value := range lessonMap {
-			sum += value
-			counter++
-		}
-		res = float32(sum) / float32(counter)
-
-		return res, true
+	for _, lesson := range student.Lessons {
+		sum += lesson.Grade
+		counter++
 	}
+	res = float32(sum) / float32(counter)
 
-	return 0, false
+	return res, true
 }
 
-func studentList(studentCard map[string]map[string]int) {
+func studentList(studentCard map[string]Student) {
 	for studentName, lesson := range studentCard {
 		fmt.Printf("Имя слудента: %s\n", studentName)
 
-		for currentLesson, grade := range lesson {
-			fmt.Printf("Предмет=> %s| Оценка: %d\n", currentLesson, grade)
+		for _, currentLesson := range lesson.Lessons {
+			fmt.Printf("Предмет=> %s| Оценка: %d\n", currentLesson.Title, currentLesson.Grade)
+		}
+	}
+}
+
+func checkLessonDuplicate() bool {
+	var answer string
+	fmt.Println("Исключать дубли предметов из карты студентов?")
+
+	for {
+		fmt.Printf("Введите ответ YES | NO : ")
+
+		_, err := fmt.Scan(&answer)
+		if err != nil {
+			fmt.Println("Ошибка ввода")
+
+			continue
+		}
+
+		answer = strings.ToLower(answer)
+
+		if answer == trueQuestionAnswer {
+
+			fmt.Println("Дубли предметов будут удалены")
+
+			return true
+		}
+
+		if answer == falseQuestionAnswer {
+
+			fmt.Println("Дубли предметов будут добавлены")
+
+			return false
 		}
 	}
 }
 
 func main() {
-	studentGrades := make(map[string]map[string]int)
+	studentGrades := make(map[string]Student)
 	studentArray := [][]string{
 		{"John", "Математика", "8"},
 		{"Anna", "Русский", "5"},
@@ -111,8 +156,10 @@ func main() {
 		{"Anna", "Английский", "8"},
 	}
 
+	checkLesson := checkLessonDuplicate()
+
 	for _, student := range studentArray {
-		addStudentCard(studentGrades, student[0], student[1], student[2])
+		addStudentCard(studentGrades, student[0], student[1], student[2], checkLesson)
 	}
 
 	fmt.Println("================")
