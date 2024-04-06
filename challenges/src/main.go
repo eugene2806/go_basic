@@ -32,7 +32,7 @@ func addStudentCard(
 		studentCard[name] = Student{
 			Name: name,
 			Lessons: []LessonInfo{
-				{lesson, grade},
+				*NewLessonInfo(lesson, grade),
 			},
 		}
 
