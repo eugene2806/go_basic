@@ -2,235 +2,202 @@ package main
 
 import "fmt"
 
-var uniqueValues = make(map[int]int, 40)
-
-type Element struct {
-	data int
-	next *Element
+type ListNode struct {
+	Val  int
+	Next *ListNode
 }
 
-func genNewList(data int) *Element {
-	uniqueValues[data] = data
-
-	return &Element{data: data, next: nil}
+func genNewList(data int) *ListNode {
+	return &ListNode{Val: data, Next: nil}
 }
 
-func detectDuplicate(data int) bool {
-	if _, ok := uniqueValues[data]; ok {
-
-		return true
-	}
-
-	return false
-}
-
-func (el *Element) addToEnd(data int) {
+func (el *ListNode) Append(data int) {
 	currEl := el
-	var lastEl *Element
+	var lastEl *ListNode
 
-	for {
-		if currEl.next != nil {
-
-			currEl = currEl.next
-			continue
-		}
-
-		if detectDuplicate(data) {
-			lastEl = currEl
-
-			return
-		}
-
-		lastEl = genNewList(data)
-		currEl.next = lastEl
-
-		return
+	for currEl.Next != nil {
+		currEl = currEl.Next
 	}
 
+	lastEl = genNewList(data)
+	currEl.Next = lastEl
 }
 
-func (el *Element) addToHead(data int) *Element {
+func (el *ListNode) Prepend(data int) *ListNode {
 	currEl := el
-	var newEl *Element
-
-	if detectDuplicate(data) {
-
-		return currEl
-	}
+	var newEl *ListNode
 
 	newEl = genNewList(data)
 
-	newEl.next = currEl
+	newEl.Next = currEl
 	currEl = newEl
 
 	return newEl
 }
 
-func (el *Element) addToIndex(index int, dataList ...int) {
+func (el *ListNode) Insert(index int, dataList ...int) {
 	countIndex := 0
 	currEl := el
-	var newEl *Element
+	var newEl *ListNode
 
 	for _, data := range dataList {
 
-		if detectDuplicate(data) {
-			continue
-		}
-
 		newEl = genNewList(data)
 
-		for {
-			if countIndex != index && currEl.next != nil {
-				currEl = currEl.next
-				countIndex++
-				continue
-			}
-
-			if currEl.next == nil {
-				fmt.Println("Для добавления элемента в конец списка используйте - addToEnd()")
-
-				return
-			}
-
-			newEl.next = currEl.next
-			currEl.next = newEl
-			index++
-			break
+		for countIndex != index && currEl.Next != nil {
+			currEl = currEl.Next
+			countIndex++
 		}
+
+		if currEl.Next == nil {
+			fmt.Println("Для добавления элемента в конец списка используйте - Append()")
+
+			return
+		}
+
+		newEl.Next = currEl.Next
+		currEl.Next = newEl
+		index++
 	}
 }
 
-func (el *Element) removeToEnd() {
+func (el *ListNode) Delete(index int) *ListNode {
+	firstEl := el
 	currEl := el
-	var prevEl *Element
+	var prevEl *ListNode
+	countIndex := 0
 
-	for {
-		if currEl.next != nil {
-			prevEl = currEl
-			currEl = currEl.next
-			continue
-		}
-
-		delete(uniqueValues, currEl.data)
-		prevEl.next = nil
-
-		return
-	}
-}
-
-func (el *Element) removeToHead() *Element {
-	currEl := el
-	var prevEl *Element
-
-	if currEl.next != nil {
-		prevEl = currEl
-		currEl = currEl.next
-		delete(uniqueValues, prevEl.data)
-		prevEl.next = nil
+	if index == 0 {
+		currEl = currEl.Next
+		firstEl.Next = nil
 
 		return currEl
+	}
+
+	for countIndex != index && currEl.Next != nil {
+		prevEl = currEl
+		currEl = currEl.Next
+		countIndex++
+	}
+
+	if index > countIndex {
+		fmt.Println("Unknown index")
+		return firstEl
+	}
+
+	prevEl.Next = currEl.Next
+	return firstEl
+}
+
+func (el *ListNode) Length() int {
+	currEl := el
+	count := 0
+
+	for currEl != nil {
+		currEl = currEl.Next
+		count++
+	}
+
+	return count
+}
+
+func (el *ListNode) Search(data int) (index int, node *ListNode) {
+	currEl := el
+	firstEl := el
+	countIndex := 0
+
+	for currEl != nil {
+		if currEl.Val == data {
+			return countIndex, currEl
+		}
+
+		currEl = currEl.Next
+		countIndex++
+	}
+
+	fmt.Printf("Элемент => %d не найден\n", data)
+
+	return 0, firstEl
+}
+
+func (el *ListNode) Get(index int) *ListNode {
+	currEl := el
+	firstEl := el
+	countIndex := 0
+
+	for index != countIndex && currEl.Next != nil {
+		currEl = currEl.Next
+		countIndex++
+	}
+
+	if index > countIndex {
+		fmt.Println("Unknown index")
+
+		return firstEl
 	}
 
 	return currEl
 }
 
-func (el *Element) removeToIndex(index int) {
+func (el *ListNode) Update(index, data int) {
 	currEl := el
-	var prevEl *Element
 	countIndex := 0
 
-	if index == 0 {
+	for index != countIndex && currEl.Next != nil {
+		currEl = currEl.Next
+		countIndex++
+	}
+
+	if index > countIndex {
+		fmt.Println("Unknown index")
+
 		return
 	}
 
-	for {
-		if countIndex != index && currEl.next != nil {
-			prevEl = currEl
-			currEl = currEl.next
-			countIndex++
-			continue
-		}
-
-		if currEl.next == nil {
-			fmt.Println("Для удаления элемента в конеце списка используйте - removeToEnd()")
-
-			return
-		}
-
-		delete(uniqueValues, currEl.data)
-		prevEl.next = currEl.next
-
-		break
-	}
+	currEl.Val = data
 }
 
-func (el *Element) search(data int) (index, dataEl int) {
+func (el *ListNode) Traverse() {
 	currEl := el
-	countIndex := 0
 
-	for {
-		if currEl.data == data {
-			return countIndex, currEl.data
-		}
-
-		if currEl.next != nil {
-			currEl = currEl.next
-			countIndex++
-			continue
-		}
-		break
-	}
-	fmt.Printf("Элемент => %d не найден\n", data)
-
-	return 0, 0
-}
-
-func printList(el *Element) {
 	fmt.Printf("[")
-	for {
-		if el.next == nil {
-			fmt.Printf("%d", el.data)
-			fmt.Printf("]\n")
 
-			return
-		}
-		fmt.Printf("%d, ", el.data)
-
-		if el.next != nil {
-			el = el.next
-			continue
-		}
+	for currEl.Next != nil {
+		fmt.Printf("%d, ", currEl.Val)
+		currEl = currEl.Next
 	}
+
+	fmt.Printf("%d", currEl.Val)
+	fmt.Printf("]\n")
 }
 
 func main() {
 
 	head := genNewList(10)
-	head.addToEnd(15)
 
-	head = head.addToHead(10)
-	head.addToEnd(18)
-	fmt.Println("First Element", head)
-	head.addToEnd(19)
+	head.Append(15)
 
-	head = head.addToHead(0)
-	fmt.Println("First Element", head)
-	printList(head)
+	head = head.Prepend(10)
+	head.Append(18)
+	fmt.Println("First ListNode", head)
+	head.Append(19)
+
+	head = head.Prepend(0)
+	fmt.Println("First ListNode", head)
+	head.Traverse()
 
 	fmt.Println("===============")
 
-	head.addToIndex(3, 1, 2, 3)
-	printList(head)
-
-	head.removeToEnd()
-	head.removeToEnd()
-	head = head.removeToHead()
-	printList(head)
-
-	head.removeToIndex(3)
-	printList(head)
-
-	index, val := head.search(15)
-	fmt.Printf("Индекс => %d Элемент => %d\n", index, val)
+	head = head.Delete(0)
+	head.Insert(3, 1, 2, 3)
+	head.Traverse()
+	head = head.Delete(7)
+	head.Update(6, 100)
+	head.Traverse()
+	fmt.Println(head.Length())
+	index, head2 := head.Search(3)
+	fmt.Printf("Индекс => %d Элемент => %d\n", index, head2)
+	head3 := head.Get(7)
+	fmt.Println(head3)
 
 }
