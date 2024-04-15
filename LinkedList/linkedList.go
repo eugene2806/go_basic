@@ -7,11 +7,11 @@ type ListNode struct {
 	Next *ListNode
 }
 
-func genNewList(data int) *ListNode {
+func NewList(data int) *ListNode {
 	return &ListNode{Val: data, Next: nil}
 }
 
-func (el *ListNode) Append(data int) {
+func (el *ListNode) Append(newNode *ListNode) {
 	currEl := el
 	var lastEl *ListNode
 
@@ -19,15 +19,15 @@ func (el *ListNode) Append(data int) {
 		currEl = currEl.Next
 	}
 
-	lastEl = genNewList(data)
+	lastEl = newNode
 	currEl.Next = lastEl
 }
 
-func (el *ListNode) Prepend(data int) *ListNode {
+func (el *ListNode) Prepend(newNode *ListNode) *ListNode {
 	currEl := el
 	var newEl *ListNode
 
-	newEl = genNewList(data)
+	newEl = newNode
 
 	newEl.Next = currEl
 	currEl = newEl
@@ -35,14 +35,14 @@ func (el *ListNode) Prepend(data int) *ListNode {
 	return newEl
 }
 
-func (el *ListNode) Insert(index int, dataList ...int) {
+func (el *ListNode) Insert(index int, newNode ...*ListNode) {
 	countIndex := 0
 	currEl := el
 	var newEl *ListNode
 
-	for _, data := range dataList {
+	for _, data := range newNode {
 
-		newEl = genNewList(data)
+		newEl = data
 
 		for countIndex != index && currEl.Next != nil {
 			currEl = currEl.Next
@@ -173,29 +173,36 @@ func (el *ListNode) Traverse() {
 
 func main() {
 
-	head := genNewList(10)
+	head := NewList(10)
 
-	head.Append(15)
-
-	head = head.Prepend(10)
-	head.Append(18)
+	el1 := NewList(15)
+	head.Append(el1)
+	el2 := NewList(10)
+	head = head.Prepend(el2)
+	el3 := NewList(18)
+	head.Append(el3)
 	fmt.Println("First ListNode", head)
-	head.Append(19)
+	el4 := NewList(19)
+	head.Append(el4)
 
-	head = head.Prepend(0)
+	el5 := NewList(0)
+	head = head.Prepend(el5)
 	fmt.Println("First ListNode", head)
 	head.Traverse()
 
 	fmt.Println("===============")
 
 	head = head.Delete(0)
-	head.Insert(3, 1, 2, 3)
+	el6 := NewList(1)
+	el7 := NewList(2)
+	el8 := NewList(3)
+	head.Insert(3, el6, el7, el8)
 	head.Traverse()
 	head = head.Delete(7)
 	head.Update(6, 100)
 	head.Traverse()
 	fmt.Println(head.Length())
-	index, head2 := head.Search(3)
+	index, head2 := head.Search(1)
 	fmt.Printf("Индекс => %d Элемент => %d\n", index, head2)
 	head3 := head.Get(7)
 	fmt.Println(head3)
