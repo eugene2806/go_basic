@@ -79,20 +79,18 @@ func addLesson(
 	return
 }
 
-func averageGrade(studentCard map[string]Student, name string) (float32, bool) {
+func (s Student) averageGrade() (float32, bool) {
 	var sum int
 	var res float32
 	var counter int
 
-	student, ok := studentCard[name]
-
-	if !ok {
-		fmt.Printf("Ошибка подсчета для: %s", name)
+	if s.Name == "" {
+		fmt.Printf("Ошибка подсчета для: %s", s.Name)
 
 		return 0, false
 	}
 
-	for _, lesson := range student.Lessons {
+	for _, lesson := range s.Lessons {
 		sum += lesson.Grade
 		counter++
 	}
@@ -108,6 +106,8 @@ func studentList(studentCard map[string]Student) {
 		for _, currentLesson := range lesson.Lessons {
 			fmt.Printf("Предмет=> %s| Оценка: %d\n", currentLesson.Title, currentLesson.Grade)
 		}
+		student, _ := studentCard[studentName].averageGrade()
+		fmt.Println("Средняя оценка по всем предметам:", student)
 	}
 }
 
@@ -163,12 +163,14 @@ func main() {
 	}
 
 	fmt.Println("================")
-	studentName1, success1 := averageGrade(studentGrades, "Anna")
+
+	studentName1, success1 := studentGrades["Anna"].averageGrade()
 	fmt.Printf("Средняя оценка студента Anna %.2f. Подсчет верный: %t\n", studentName1, success1)
-	studentName2, success2 := averageGrade(studentGrades, "Mike")
+	studentName2, success2 := studentGrades["Mike"].averageGrade()
 	fmt.Printf("Средняя оценка студента Mike %.2f. Подсчет верный: %t\n", studentName2, success2)
 
 	fmt.Println("================")
+
 	studentList(studentGrades)
 
 }
